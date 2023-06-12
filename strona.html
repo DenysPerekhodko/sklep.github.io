@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Zakup samochodów - serwis</title>
+  <style>
+    body {
+      text-align: center;
+    }
+
+    .banner {
+      background-color: #f1f1f1;
+      padding: 10px;
+    }
+
+    .car-block {
+      display: inline-block;
+      text-align: center;
+      margin: 20px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .car-image {
+      max-width: 100%;
+      max-height: 200px;
+      height: auto;
+    }
+
+    .car-info {
+      margin-top: 10px;
+    }
+
+    .car-info p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <h1>Zakup samochodów - serwis</h1>
+  </div>
+
+  <div id="carList">
+    <h2>Lista samochodów</h2>
+    <div class="car-block">
+      <img class="car-image" src="ford.jpg" alt="Car 1" />
+      <div class="car-info">
+        <p>Cena: 50000</p>
+        <p>Marka: Ford</p>
+        <p>Rok: 2022</p>
+        <p>Model: Focus</p>
+        <p>Rocznik: 2021</p>
+        <p>Moc silnika: 150 KM</p>
+        <p>Przebieg: 10000 km</p>
+      </div>
+      <button onclick="showConfigForm(1)">Konfiguruj</button>
+    </div>
+    <div class="car-block">
+      <img class="car-image" src="x5.jpg" alt="Car 2" />
+      <div class="car-info">
+        <p>Cena: 60000</p>
+        <p>Marka: BMW</p>
+        <p>Rok: 2021</p>
+        <p>Model: X5</p>
+        <p>Rocznik: 2021</p>
+        <p>Moc silnika: 200 KM</p>
+        <p>Przebieg: 5000 km</p>
+      </div>
+      <button onclick="showConfigForm(2)">Konfiguruj</button>
+    </div>
+    <div class="car-block">
+      <img class="car-image" src="toyota.jpg" alt="Car 3" />
+      <div class="car-info">
+        <p>Cena: 45000</p>
+        <p>Marka: Toyota</p>
+        <p>Rok: 2022</p>
+        <p>Model: Corolla</p>
+        <p>Rocznik: 2021</p>
+        <p>Moc silnika: 120 KM</p>
+        <p>Przebieg: 8000 km</p>
+      </div>
+      <button onclick="showConfigForm(3)">Konfiguruj</button>
+    </div>
+  </div>
+
+  <div id="configForm" class="hidden">
+    <h2>Formularz konfiguracji</h2>
+    <form onsubmit="purchaseCar(event)">
+      <div>
+        <label for="financingCash">Gotówka</label>
+        <input type="radio" id="financingCash" name="financing" value="gotowka" required />
+        <label for="financingLeasing">Leasing</label>
+        <input type="radio" id="financingLeasing" name="financing" value="leasing" required />
+      </div>
+      <div>
+        <label for="ownerName">Imię i nazwisko:</label>
+        <input type="text" id="ownerName" name="ownerName" required />
+      </div>
+      <div>
+        <label for="deliveryDate">Data dostawy:</label>
+        <input type="date" id="deliveryDate" name="deliveryDate" required />
+      </div>
+      <div>
+        <label for="accessories">Akcesoria:</label>
+        <select id="accessories" name="accessories" multiple>
+          <option value="1">Klimatyzacja - 2000 zł</option>
+          <option value="2">System nawigacji - 3000 zł</option>
+          <option value="3">Skórzane fotele - 4000 zł</option>
+        </select>
+      </div>
+      <div>
+        <button type="submit">Zakup</button>
+        <button type="button" onclick="goBackToList()">Powrót do wyboru</button>
+      </div>
+      <div id="formError" class="error"></div>
+    </form>
+  </div>
+
+  <div id="summary" class="hidden">
+    <h2>Podsumowanie</h2>
+    <p>Dziękujemy za zakup auta!</p>
+    <p>Metoda płatności: <span id="paymentMethod"></span></p>
+    <img id="carImage" src="" alt="Car" />
+    <p>Cena auta z akcesoriami: <span id="totalPrice"></span> zł</p>
+  </div>
+
+  <script>
+    let selectedCar = null;
+
+    function showConfigForm(carId) {
+      selectedCar = carId;
+      document.getElementById('carList').classList.add('hidden');
+      document.getElementById('configForm').classList.remove('hidden');
+    }
+
+    function goBackToList() {
+      document.getElementById('configForm').classList.add('hidden');
+      document.getElementById('carList').classList.remove('hidden');
+      resetForm();
+    }
+
+    function purchaseCar(event) {
+      event.preventDefault();
+
+      const financing = document.querySelector('input[name="financing"]:checked').value;
+      const ownerName = document.getElementById('ownerName').value;
+      const deliveryDate = document.getElementById('deliveryDate').value;
+      const accessories = Array.from(document.getElementById('accessories').selectedOptions)
+        .map(option => option.value);
+
+      if (!ownerName || !deliveryDate || accessories.length === 0) {
+        document.getElementById('formError').textContent = 'Wypełnij wszystkie pola!';
+        return;
+      }
+
+      const nameParts = ownerName.split(' ');
+      if (nameParts.length !== 2) {
+        document.getElementById('formError').textContent = 'Niepoprawne imię i nazwisko!';
+        return;
+      }
+
+      const totalPrice = calculateTotalPrice(accessories);
+      const carImage = getCarImage(selectedCar);
+
+      document.getElementById('paymentMethod').textContent = financing;
+      document.getElementById('carImage').src = carImage;
+      document.getElementById('totalPrice').textContent = totalPrice;
+
+      document.getElementById('configForm').classList.add('hidden');
+      document.getElementById('summary').classList.remove('hidden');
+
+      resetForm();
+    }
+
+    function resetForm() {
+      document.getElementById('financingCash').checked = false;
+      document.getElementById('financingLeasing').checked = false;
+      document.getElementById('ownerName').value = '';
+      document.getElementById('deliveryDate').value = '';
+      document.getElementById('accessories').selectedIndex = -1;
+      document.getElementById('formError').textContent = '';
+    }
+
+    function calculateTotalPrice(accessories) {
+      let totalPrice = 0;
+      const carPrices = {
+        1: 50000,
+        2: 60000,
+        3: 45000
+      };
+
+      const accessoryPrices = {
+        1: 2000,
+        2: 3000,
+        3: 4000
+      };
+
+      const selectedCarPrice = carPrices[selectedCar];
+      totalPrice += selectedCarPrice;
+
+      accessories.forEach(accessoryId => {
+        totalPrice += accessoryPrices[accessoryId];
+      });
+
+      return totalPrice;
+    }
+
+    function getCarImage(carId) {
+      if (carId === 1) {
+        return 'ford.jpg';
+      } else if (carId === 2) {
+        return 'x5.jpg';
+      } else if (carId === 3) {
+        return 'toyota.jpg';
+      }
+      return '';
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
